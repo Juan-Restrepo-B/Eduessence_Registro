@@ -53,7 +53,6 @@ require('phpqrcode/qrlib.php');
 // Procesar el formulario enviado por POST
 if (isset($_POST['register'])) {
     $punto = $_POST["lista"];
-    $direccion = $_POST["campo1"];
     $fecha = $_POST["campo2"];
     $curso = $_POST["campo3"];
 
@@ -67,7 +66,7 @@ if (isset($_POST['register'])) {
 
     // Consulta para insertar un nuevo registro en la base de datos
     $sql = "INSERT INTO ENTRADA_SALIDA (INOUT_PUNTO, INOUT_DIRECCION, INOUT_URL_CONTROL, INOUT_FECHORA, INOUT_CURSO, INOUT_QR)
-            VALUES('$punto', '$direccion', '$qrData', '$fecha', '$curso', '$qrBlob')";
+            VALUES('$punto', 'https://www.eduessence.com/', '$qrData', '$fecha', '$curso', '$qrBlob')";
     // if (mysqli_query($conn, $sql)) {
     //     // Generar el QR
     //     $qrData = "https://www.eduessence.com/?action=checking&control=$punto&cursoId=$curso";
