@@ -82,7 +82,7 @@ if (isset($_POST['register'])) {
 
         // Insertar en la tabla (ejemplo, ajusta a tu lógica)
         $idPunto = mysqli_insert_id($conn); // ID recién insertado, si aplica
-        $sqlUpdate = "UPDATE ENTRADA_SALIDA SET INOUT_QR_BLOB = '$qrBlobEscaped' WHERE IDPUNTO = $idPunto";
+        $sqlUpdate = "UPDATE ENTRADA_SALIDA SET INOUT_QR_BLOB = '$qrBlobEscaped' WHERE IDPUNTO = ".mysqli_insert_id($conn);
         mysqli_query($conn, $sqlUpdate);
 
         // Eliminar el archivo temporal
