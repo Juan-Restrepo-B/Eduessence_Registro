@@ -57,32 +57,42 @@ if (isset($_POST['register'])) {
     $fecha = $_POST["campo2"];
     $curso = $_POST["campo3"];
 
+    // Generar el QR
+    $qrData = "https://www.eduessence.com/?action=checking&control=$punto&cursoId=$curso";
+    ob_start(); // Inicia el buffer
+    QRcode::png($qrData, null, 'M', 10, 3); // QR en PNG
+    $qrBlob = ob_get_clean(); // Obtiene y limpia el buffer
+
+
+
     // Consulta para insertar un nuevo registro en la base de datos
-    $sql = "INSERT INTO ENTRADA_SALIDA (INOUT_PUNTO, INOUT_DIRECCION, INOUT_URL_CONTROL, INOUT_FECHORA, INOUT_CURSO)
-            VALUES('$punto', '$direccion', '$direccion/?action=checking&control=$punto&cursoId=$curso', '$fecha', '$curso')";
-    if (mysqli_query($conn, $sql)) {
-        // Generar el QR
-        $qrData = "https://www.eduessence.com/?action=checking&control=$punto&cursoId=$curso";
-        ob_start(); // Inicia el buffer de salida
-        QRcode::png($qrData, null, 'M', 10, 3); // Genera el PNG en el buffer
-        $qrBlob = ob_get_clean(); // Captura y limpia el buffer
+    $sql = "INSERT INTO ENTRADA_SALIDA (INOUT_PUNTO, INOUT_DIRECCION, INOUT_URL_CONTROL, INOUT_FECHORA, INOUT_CURSO, INOUT_QR)
+            VALUES('$punto', '$direccion', '$qrData', '$fecha', '$curso', '$qrBlob')";
+    // if (mysqli_query($conn, $sql)) {
+    //     // Generar el QR
+    //     $qrData = "https://www.eduessence.com/?action=checking&control=$punto&cursoId=$curso";
+    //     ob_start(); // Inicia el buffer
+    //     QRcode::png($qrData, null, 'M', 10, 3); // QR en PNG
+    //     $qrBlob = ob_get_clean(); // Obtiene y limpia el buffer
 
-        $idPunto = mysqli_insert_id($conn); // ID insertado correctamente
+    //     $idPunto = mysqli_insert_id($conn);
 
-        // Preparar la consulta con marcador
-        $sqlUpdate = "UPDATE ENTRADA_SALIDA SET INOUT_QR_BLOB = ? WHERE IDPUNTO = ?";
-        $stmt = mysqli_prepare($conn, $sqlUpdate);
+    //     // Preparar la consulta
+    //     $sqlUpdate = "UPDATE ENTRADA_SALIDA SET INOUT_QR = ? WHERE IDPUNTO = ?";
+    //     $stmt = mysqli_prepare($conn, $sqlUpdate);
 
-        // Importante: usa 's' para string (el binario también es un string en PHP)
-        mysqli_stmt_bind_param($stmt, "si", $qrBlob, $idPunto);
-        mysqli_stmt_execute($stmt);
-        mysqli_stmt_close($stmt);
+    //     // IMPORTANTE: usa un marcador temporal ('b' no existe en PHP, así que usamos 'si' como dummy)
+    //     $null = NULL;
+    //     mysqli_stmt_bind_param($stmt, "bi", $null, $idPunto); // 'b' no es válido, pero así se inicializa
+    //     mysqli_stmt_send_long_data($stmt, 0, $qrBlob); // Enviar los datos binarios reales
+    //     mysqli_stmt_execute($stmt);
+    //     mysqli_stmt_close($stmt);
 
-        // Redirigir
-        header("Location: qr_input_output.php");
-        exit;
-    }
-
+    //     header("Location: qr_input_output.php");
+    //     exit;
+    // } else {
+    //     echo "Error al insertar el registro: " . mysqli_error($conn);
+    // }
 }
 
 // Consulta para obtener todos los registros de ENTRADA_SALIDA
@@ -90,8 +100,6 @@ $result = mysqli_query($conn, "SELECT * FROM ENTRADA_SALIDA ORDER BY IDPUNTO DES
 
 // Consulta para obtener los puntos de TIPO_DATE con IDTIPODATE en (3, 4)
 $result1 = mysqli_query($conn, "SELECT PUNTO FROM TIPO_DATE WHERE IDTIPODATE IN (3, 4)");
-
-$result2 = mysqli_query($conn, "SELECT * FROM LINKS WHERE IDLINKS IN (3)");
 
 $result3 = mysqli_query($conn, "SELECT * FROM CURSOS WHERE IDCURSO NOT IN (1, 2, 3)");
 
