@@ -145,10 +145,10 @@ $result3 = mysqli_query($conn, "SELECT * FROM CURSOS WHERE IDCURSO NOT IN (1, 2,
                                 ?>
                                 </select><br><br>
                                 <!-- <input type="text" id="campo1" name="campo1" required=""> -->
+                                <label for="campo2">FECHA Y HORA:</label>
+                                <input type="datetime-local" id="campo2" name="campo2" required=""><br><br>
                                 <label for="campo3">CURSO:</label>
-                                <input type="datetime-local" id="campo3" name="campo3" required=""><br><br>
-                                <label for="lista">PUNTO:</label>
-                                <select id="lista" name="lista">
+                                <select id="campo3" name="campo3">
                                     <?php
                                 while ($row = mysqli_fetch_array($result3)) {
                                     $idCurso = $row['IDCURSO'];
