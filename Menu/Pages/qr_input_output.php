@@ -51,7 +51,7 @@ include("con_db.php");
 require('phpqrcode/qrlib.php');
 
 // Procesar el formulario enviado por POST
-if (isset($_POST[ 'register'])){
+if (isset($_POST['register'])) {
     $punto = $_POST["lista"];
     $direccion = $_POST["campo1"];
     $fecha = $_POST["campo2"];
@@ -61,32 +61,36 @@ if (isset($_POST[ 'register'])){
     $sql = "INSERT INTO ENTRADA_SALIDA (INOUT_PUNTO, INOUT_DIRECCION, INOUT_URL_CONTROL, INOUT_FECHORA, INOUT_CURSO)
             VALUES('$punto', '$direccion', '$direccion/?action=checking&control=$punto&cursoId=$curso', '$fecha', '$curso')";
     if (mysqli_query($conn, $sql)) {
-        // Registro insertado correctamente
-
-        // Generate the QR code data
+        // Generar el QR como antes
         $qrData = "$direccion/?action=checking&control=$punto&cursoId=$curso";
-
-        // Generate a unique filename for the QR code image
-        $qrFilename = uniqid('qr_', true) . '.png';
-
-        // Path where the QR code image will be stored
-        $dir = './qr_codes/entrada-salida/' . $qrFilename;
-
-        //Variables
         $tamaño = 10;
         $nivelCorreccion = 'M';
         $margin = 3;
         $contenido = $qrData;
 
-        // Generate and save the QR code as an image
-        QRcode::png($contenido, $dir, $nivelCorreccion, $tamaño, $margin);
+        // Crear un archivo temporal
+        $tempFile = tempnam(sys_get_temp_dir(), 'qr_') . '.png';
 
-        // Save the QR code filename to the database
-        $sqlUpdate = "UPDATE ENTRADA_SALIDA SET INOUT_QR = '$contenido' WHERE IDPUNTO = ".mysqli_insert_id($conn);
+        // Generar QR en archivo temporal
+        QRcode::png($contenido, $tempFile, $nivelCorreccion, $tamaño, $margin);
+
+        // Leer contenido binario del archivo
+        $qrBlob = file_get_contents($tempFile);
+
+        // Escapar para evitar problemas en la consulta
+        $qrBlobEscaped = mysqli_real_escape_string($conn, $qrBlob);
+
+        // Insertar en la tabla (ejemplo, ajusta a tu lógica)
+        $idPunto = mysqli_insert_id($conn); // ID recién insertado, si aplica
+        $sqlUpdate = "UPDATE ENTRADA_SALIDA SET INOUT_QR_BLOB = '$qrBlobEscaped' WHERE IDPUNTO = $idPunto";
         mysqli_query($conn, $sqlUpdate);
-        
-        // Redirect the user to another page after successful form submission
+
+        // Eliminar el archivo temporal
+        unlink($tempFile);
+
+        // Redirigir
         header("Location: qr_input_output.php");
+
     }
 }
 
@@ -128,21 +132,21 @@ $result3 = mysqli_query($conn, "SELECT * FROM CURSOS WHERE IDCURSO NOT IN (1, 2,
                                 <label for="lista">PUNTO:</label>
                                 <select id="lista" name="lista">
                                     <?php
-                                while ($row = mysqli_fetch_array($result1)) {
-                                    $mostrar = $row['PUNTO'];
-                                    echo "<option value='$mostrar'>$mostrar</option>";
-                                }
-                                ?>
+                                    while ($row = mysqli_fetch_array($result1)) {
+                                        $mostrar = $row['PUNTO'];
+                                        echo "<option value='$mostrar'>$mostrar</option>";
+                                    }
+                                    ?>
                                 </select><br><br>
                                 <!-- Campo de texto para la dirección del servicio web -->
                                 <label for="campo1">DIRECCION SERVICIO WEB:</label>
                                 <select id="campo1" name="campo1">
                                     <?php
-                                while ($row = mysqli_fetch_array($result2)) {
-                                    $mostrar = $row['LINKS'];
-                                    echo "<option value='$mostrar'>$mostrar</option>";
-                                }
-                                ?>
+                                    while ($row = mysqli_fetch_array($result2)) {
+                                        $mostrar = $row['LINKS'];
+                                        echo "<option value='$mostrar'>$mostrar</option>";
+                                    }
+                                    ?>
                                 </select><br><br>
                                 <!-- <input type="text" id="campo1" name="campo1" required=""> -->
                                 <label for="campo2">FECHA Y HORA:</label>
@@ -150,12 +154,12 @@ $result3 = mysqli_query($conn, "SELECT * FROM CURSOS WHERE IDCURSO NOT IN (1, 2,
                                 <label for="campo3">CURSO:</label>
                                 <select id="campo3" name="campo3">
                                     <?php
-                                while ($row = mysqli_fetch_array($result3)) {
-                                    $idCurso = $row['IDCURSO'];
-                                    $idNombreCurso = $row['CURSONAME'];
-                                    echo "<option value='$idCurso'>$idNombreCurso</option>";
-                                }
-                                ?>
+                                    while ($row = mysqli_fetch_array($result3)) {
+                                        $idCurso = $row['IDCURSO'];
+                                        $idNombreCurso = $row['CURSONAME'];
+                                        echo "<option value='$idCurso'>$idNombreCurso</option>";
+                                    }
+                                    ?>
                                 </select><br><br>
                                 <button class="btn btn-primary btn-block" type="submit" name="register">CREAR</button>
                                 &nbsp;&nbsp;
@@ -201,39 +205,41 @@ $result3 = mysqli_query($conn, "SELECT * FROM CURSOS WHERE IDCURSO NOT IN (1, 2,
                 <td>DIRECCION SERVICIO WEB</td>
                 <td>FECHA</td>
                 <td>QR</td>
-                <td class="titulof"><svg xmlns="http://www.w3.org/2000/svg" margin-left="0" width="24" height="24" viewBox="0 0 24 24"
-                        style="fill: rgba(255, 255, 255, 1);">
+                <td class="titulof"><svg xmlns="http://www.w3.org/2000/svg" margin-left="0" width="24" height="24"
+                        viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1);">
                         <path
                             d="M19 7h-1V2H6v5H5c-1.654 0-3 1.346-3 3v7c0 1.103.897 2 2 2h2v3h12v-3h2c1.103 0 2-.897 2-2v-7c0-1.654-1.346-3-3-3zM8 4h8v3H8V4zm8 16H8v-4h8v4zm4-3h-2v-3H6v3H4v-7c0-.551.449-1 1-1h14c.552 0 1 .449 1 1v7z">
                         </path>
                         <path d="M14 10h4v2h-4z"></path>
-                </svg></td>
+                    </svg></td>
             </tr>
             <?php
-        $result = mysqli_query($conn, "SELECT * FROM ENTRADA_SALIDA ORDER BY IDPUNTO DESC");
+            $result = mysqli_query($conn, "SELECT * FROM ENTRADA_SALIDA ORDER BY IDPUNTO DESC");
 
             // Mostrar los registros de ENTRADA_SALIDA en la tabla
             while ($mostrar = mysqli_fetch_array($result)) {
+                ?>
+                <tr>
+                    <td class="NroId">
+                        <?php echo $mostrar['IDPUNTO'] ?>
+                    </td>
+                    <td>
+                        <?php echo $mostrar['INOUT_PUNTO'] ?>
+                    </td>
+                    <td>
+                        <?php echo $mostrar['INOUT_DIRECCION'] ?>
+                    </td>
+                    <td class="fechav">
+                        <?php echo $mostrar['INOUT_FECHORA'] ?>
+                    </td>
+                    <td class="imgQR"><img width="100" src="./qr_codes/entrada-salida/<?php echo $mostrar['INOUT_QR'] ?>">
+                    </td>
+                    <td class="btnfrom"><a href="fpdf/QRIN.php?IDPUNTO=<?php echo $mostrar['IDPUNTO']; ?>"
+                            target="_blank">IMPRIMIR</a></td>
+                </tr>
+                <?php
+            }
             ?>
-            <tr>
-                <td class="NroId">
-                    <?php echo $mostrar['IDPUNTO'] ?>
-                </td>
-                <td>
-                    <?php echo $mostrar['INOUT_PUNTO'] ?>
-                </td>
-                <td>
-                    <?php echo $mostrar['INOUT_DIRECCION'] ?>
-                </td>
-                <td class="fechav">
-                    <?php echo $mostrar['INOUT_FECHORA'] ?>
-                </td>
-                <td class="imgQR"><img width="100" src="./qr_codes/entrada-salida/<?php echo $mostrar['INOUT_QR'] ?>"></td>
-                <td class="btnfrom"><a href="fpdf/QRIN.php?IDPUNTO=<?php echo $mostrar['IDPUNTO']; ?>" target="_blank">IMPRIMIR</a></td>
-            </tr>
-            <?php
-        }
-        ?>
         </table>
     </main>
     <footer class="footer">
@@ -243,9 +249,10 @@ $result3 = mysqli_query($conn, "SELECT * FROM CURSOS WHERE IDCURSO NOT IN (1, 2,
     </footer>
 </body>
 <script>
-        window.addEventListener('beforeunload', function (event) {
-            // Enviar una solicitud al servidor para cerrar la sesión cuando se cierre la pestaña
-            navigator.sendBeacon('../../index.php');
-        });
+    window.addEventListener('beforeunload', function (event) {
+        // Enviar una solicitud al servidor para cerrar la sesión cuando se cierre la pestaña
+        navigator.sendBeacon('../../index.php');
+    });
 </script>
+
 </html>
