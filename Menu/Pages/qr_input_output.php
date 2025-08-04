@@ -62,7 +62,7 @@ if (isset($_POST['register'])) {
             VALUES('$punto', '$direccion', '$direccion/?action=checking&control=$punto&cursoId=$curso', '$fecha', '$curso')";
     if (mysqli_query($conn, $sql)) {
         // Generar el QR
-        $qrData = "$direccion/?action=checking&control=$punto&cursoId=$curso";
+        $qrData = "https://www.eduessence.com/?action=checking&control=$punto&cursoId=$curso";
         ob_start(); // Inicia el buffer de salida
         QRcode::png($qrData, null, 'M', 10, 3); // Genera el PNG en el buffer
         $qrBlob = ob_get_clean(); // Captura y limpia el buffer
@@ -129,16 +129,6 @@ $result3 = mysqli_query($conn, "SELECT * FROM CURSOS WHERE IDCURSO NOT IN (1, 2,
                                     }
                                     ?>
                                 </select><br><br>
-                                <!-- Campo de texto para la dirección del servicio web -->
-                                <label for="campo1">DIRECCION SERVICIO WEB:</label>
-                                <select id="campo1" name="campo1">
-                                    <?php
-                                    while ($row = mysqli_fetch_array($result2)) {
-                                        $mostrar = $row['LINKS'];
-                                        echo "<option value='$mostrar'>$mostrar</option>";
-                                    }
-                                    ?>
-                                </select><br><br>
                                 <!-- <input type="text" id="campo1" name="campo1" required=""> -->
                                 <label for="campo2">FECHA Y HORA:</label>
                                 <input type="datetime-local" id="campo2" name="campo2" required=""><br><br>
@@ -193,7 +183,6 @@ $result3 = mysqli_query($conn, "SELECT * FROM CURSOS WHERE IDCURSO NOT IN (1, 2,
             <tr>
                 <td class="NroId">#</td>
                 <td>PUNTO</td>
-                <td>DIRECCION SERVICIO WEB</td>
                 <td>FECHA</td>
                 <td>QR</td>
                 <td class="titulof"><svg xmlns="http://www.w3.org/2000/svg" margin-left="0" width="24" height="24"
@@ -216,9 +205,6 @@ $result3 = mysqli_query($conn, "SELECT * FROM CURSOS WHERE IDCURSO NOT IN (1, 2,
                     </td>
                     <td>
                         <?php echo $mostrar['INOUT_PUNTO'] ?>
-                    </td>
-                    <td>
-                        <?php echo $mostrar['INOUT_DIRECCION'] ?>
                     </td>
                     <td class="fechav">
                         <?php echo $mostrar['INOUT_FECHORA'] ?>
