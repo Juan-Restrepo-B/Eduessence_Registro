@@ -82,7 +82,7 @@ if (isset($_POST[ 'register'])){
         QRcode::png($contenido, $dir, $nivelCorreccion, $tamaño, $margin);
 
         // Save the QR code filename to the database
-        $sqlUpdate = "UPDATE ENTRADA_SALIDA SET INOUT_QR = '$qrFilename' WHERE IDPUNTO = ".mysqli_insert_id($conn);
+        $sqlUpdate = "UPDATE ENTRADA_SALIDA SET INOUT_QR = '$contenido' WHERE IDPUNTO = ".mysqli_insert_id($conn);
         mysqli_query($conn, $sqlUpdate);
         
         // Redirect the user to another page after successful form submission
