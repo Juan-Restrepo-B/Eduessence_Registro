@@ -61,35 +61,28 @@ if (isset($_POST['register'])) {
     $sql = "INSERT INTO ENTRADA_SALIDA (INOUT_PUNTO, INOUT_DIRECCION, INOUT_URL_CONTROL, INOUT_FECHORA, INOUT_CURSO)
             VALUES('$punto', '$direccion', '$direccion/?action=checking&control=$punto&cursoId=$curso', '$fecha', '$curso')";
     if (mysqli_query($conn, $sql)) {
-        // Generar el QR como antes
-
-        // Parámetros
+        // Generar el QR
         $qrData = "$direccion/?action=checking&control=$punto&cursoId=$curso";
-        $tamaño = 10;
-        $nivelCorreccion = 'M';
-        $margin = 3;
+        ob_start(); // Inicia el buffer de salida
+        QRcode::png($qrData, null, 'M', 10, 3); // Genera el PNG en el buffer
+        $qrBlob = ob_get_clean(); // Captura y limpia el buffer
 
-        // Crear QR directamente en buffer (sin archivo físico)
-        ob_start(); // Iniciar el buffer de salida
-        QRcode::png($qrData, null, $nivelCorreccion, $tamaño, $margin); // Genera la imagen PNG y la envía al buffer
-        $qrBlob = ob_get_contents(); // Obtener contenido binario del buffer
-        ob_end_clean(); // Limpiar y cerrar el buffer
+        $idPunto = mysqli_insert_id($conn); // ID insertado correctamente
 
-        // Insertar el QR en la base de datos (campo tipo LONGBLOB por ejemplo)
-        $idPunto = mysqli_insert_id($conn); // ID recién insertado (verifica si esto es correcto en tu flujo)
-
-        // Preparar consulta segura
+        // Preparar la consulta con marcador
         $sqlUpdate = "UPDATE ENTRADA_SALIDA SET INOUT_QR_BLOB = ? WHERE IDPUNTO = ?";
         $stmt = mysqli_prepare($conn, $sqlUpdate);
+
+        // Importante: usa 's' para string (el binario también es un string en PHP)
         mysqli_stmt_bind_param($stmt, "si", $qrBlob, $idPunto);
-        mysqli_stmt_send_long_data($stmt, 0, $qrBlob); // Enviar datos binarios
         mysqli_stmt_execute($stmt);
         mysqli_stmt_close($stmt);
 
         // Redirigir
         header("Location: qr_input_output.php");
-
+        exit;
     }
+
 }
 
 // Consulta para obtener todos los registros de ENTRADA_SALIDA
@@ -230,7 +223,12 @@ $result3 = mysqli_query($conn, "SELECT * FROM CURSOS WHERE IDCURSO NOT IN (1, 2,
                     <td class="fechav">
                         <?php echo $mostrar['INOUT_FECHORA'] ?>
                     </td>
-                    <td class="imgQR"><img width="100" src="./qr_codes/entrada-salida/<?php echo $mostrar['INOUT_QR'] ?>">
+                    <td class="imgQR">
+                        <?php
+                        $qrBinary = $mostrar['INOUT_QR_BLOB'];
+                        $qrBase64 = base64_encode($qrBinary);
+                        echo "<img width='100' src='data:image/png;base64,{$qrBase64}'>";
+                        ?>
                     </td>
                     <td class="btnfrom"><a href="fpdf/QRIN.php?IDPUNTO=<?php echo $mostrar['IDPUNTO']; ?>"
                             target="_blank">IMPRIMIR</a></td>
