@@ -1,0 +1,164 @@
+@import url(Styles_Global.css);
+
+
+/*Options*/
+.options {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.positioning {
+  margin: 50px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 3rem;
+}
+
+/*Button*/
+.button {
+  display: grid;
+  place-items: center;
+  white-space: nowrap;
+  width: 500px;
+  height: 60px;
+  min-width: 350px;
+  padding: 0 0px;
+  font-weight: 700;
+  font-size: 2.5rem;
+  text-decoration: none;
+  border: none;
+  outline: 5px solid var(--Negro);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--FuentePrincipal);
+  box-shadow: 0 7px 10px var(--Secundario2);
+  text-shadow: 0.5px 0 0 var(--Secundario3);
+  transition: outline-offset .25s ease-in-out;
+  color: var(--Blanco);
+}
+
+.button_wrapper {
+  border-radius: 3px;
+}
+
+.button:hover,
+button:focus {
+  outline-offset: 4px;
+}
+
+/*Calendario*/
+.options iframe {
+  padding-left: 70px;
+  padding-bottom: 20px;
+  width: 95%;
+  height: 600px;
+}
+
+.button3,
+.button4,
+.button1 {
+  display: grid;
+  place-items: center;
+  white-space: nowrap;
+  width: 500px;
+  height: 60px;
+  min-width: 350px;
+  padding: 0 0px;
+  font-weight: 700;
+  font-size: 2.5rem;
+  text-decoration: none;
+  border: none;
+  outline: 5px solid rgb(255, 255, 255);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--FuentePrincipal);
+  box-shadow: 0 7px 10px var(--Secundario2);
+  text-shadow: 0.5px 0 0 var(--Secundario3);
+  transition: outline-offset .25s ease-in-out;
+  background-color: var(--Primario);
+  color: var(--Blanco);
+}
+
+.button2,
+.button7,
+.button8 {
+  display: grid;
+  place-items: center;
+  white-space: nowrap;
+  width: 500px;
+  height: 60px;
+  min-width: 350px;
+  padding: 0 0px;
+  font-weight: 700;
+  font-size: 2.5rem;
+  text-decoration: none;
+  border: none;
+  outline: 5px solid rgb(255, 255, 255);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--FuentePrincipal);
+  box-shadow: 0 7px 10px var(--Secundario2);
+  text-shadow: 0.5px 0 0 var(--Secundario3);
+  transition: outline-offset .25s ease-in-out;
+  background-color:  var(--Primario);
+  color: var(--Blanco);
+}
+
+.button6,
+.button5,
+.button9 {
+  display: grid;
+  place-items: center;
+  white-space: nowrap;
+  width: 500px;
+  height: 60px;
+  min-width: 350px;
+  padding: 0 0px;
+  font-weight: 700;
+  font-size: 2.5rem;
+  text-decoration: none;
+  border: none;
+  outline: 5px solid rgb(255, 255, 255);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--FuentePrincipal);
+  box-shadow: 0 7px 10px var(--Secundario2);
+  text-shadow: 0.5px 0 0 var(--Secundario3);
+  transition: outline-offset .25s ease-in-out;
+  background-color: var(--Primario);
+  color: var(--Blanco);
+}
+
+.logs {
+  width: 100%;
+  height: 180px;
+  background-color: #acacac4e;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center
+}
+.logs-img, .logs-imgs {
+  display: flex;
+}
+.logs-img img {
+  height: 180px;
+}
+.logs-imgs img {
+  height: 85px;
+  margin: 45px;
+}
+.btn-secundary {
+  padding: 10px;
+  border-radius: 10px;
+  border-color: rgb(0, 8, 255);
+  background: none;
+  color: rgb(0, 0, 0);
+  cursor: pointer;
+  &:hover{
+      box-shadow: 0px 0px 15px rgb(0, 8, 255);
+  }
+}

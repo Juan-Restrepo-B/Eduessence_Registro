@@ -1,0 +1,46 @@
+@import url(Styles_Global.css);
+main {
+    padding-bottom: 25px;
+}
+tbody, thead, tr:nth-child(odd) {
+    background-color: #111;
+}
+tbody, thead, tr:nth-child(even) {
+    background-color: #494949;
+}
+table {
+    width: 95%;
+}
+body {
+    color: white;
+}
+td {
+    text-align: center;
+    font-size: 2.2rem;
+}
+
+td img {
+    padding-top: 6px;
+}
+.NroId {
+    width: 80px;
+}
+.fechav{
+    width: 200px;
+}
+
+.imgQR {
+    width: 120px;
+    height: 120px;
+}
+.btnfrom {
+    width: 110px;
+}
+.btnfrom a{
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.8rem;
+}
+.titulof {
+    height: 50px;
+}

@@ -1,0 +1,136 @@
+/*Structure Color and Calligraphy*/
+:root {
+    --Primario: rgb(0, 46, 126);
+    --Primario1: rgb(175, 30, 47);
+    --Secundario: rgb(103, 103, 105);
+    --Secundario1:rgb(59, 59, 59);
+    --Secundario2: rgba(214, 214, 214, 0.651);
+    --Blanco: #FFF;
+    --Negro: #000;
+
+    --FuentePrincipal: 'Montserrat', sans-serif;
+    --FuenteSecundaria: ;
+}
+
+/*Globals*/
+html {
+    box-sizing: border-box;
+    font-size: 62.5%;
+    font-family: var(--FuentePrincipal);
+    position: relative;
+    width: 100%;
+    min-height: 100%;
+}
+*,
+*:before,
+*:after {
+    padding: 0;
+    margin: 0;
+    box-sizing: inherit;
+}
+
+body {
+    margin: 0;
+    font-size: 1.6rem;
+    line-height: 1.5;
+    font-family: var(--FuentePrincipal);
+}
+/*Nav*/
+header {
+    position: fixed;
+    width: 100%;
+    background-color: #000;
+}
+.contenedor {
+    width: 100%;
+    display: flex;
+}
+.add {
+    margin: 5px 10px;
+    padding-left: 30px;
+    display: flex;
+    width: 20%; 
+}
+nav {
+    width: 20%;
+    margin: 10px;
+    display: flex;
+    justify-content: flex-end;
+}
+.content_menu {
+    padding-right: 35px;
+}
+ul {
+    list-style-type: none;
+    overflow: hidden;
+}
+
+li a {
+    color: #fff;
+    text-decoration: none;
+    text-align: center;
+}
+li a:hover {
+    text-align: center;
+    width: 100px;
+    height: 21px;
+    padding: 10px;
+    color: #000;
+    background-color: var(--Blanco);
+    border-radius: 40px;
+  }
+.search-bar{
+    width: 60%;
+    height: 20px;
+    display: inline-block;;
+  }
+  .search {
+    vertical-align: middle;
+    white-space: nowrap;
+    width: 40vw;  
+    height: 30px;
+    background: var(--Blanco);
+    border: none;
+    font-size: 10pt;
+    color: var(--Negro);
+    padding-left: 45px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius:10px;
+    margin: 4.5px 0;
+  }
+  .btnsearch {
+    background-color: var(--Blanco);
+    border: none;
+    color: var(--Negro);
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 13px;
+    border-radius: 20px;
+    margin: 3px 5px;
+    text-transform: uppercase;
+  }
+/*General*/
+main {
+  padding-bottom: 25px;
+  padding-top: 60px;
+}
+/*Pie de pagina*/
+.footer {
+    position: fixed;
+    left: 0px;
+    bottom: 0px;
+    width: 100%;
+    height: 20px;
+    background: #acacac;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFF;
+  }
+  .class {
+    color: rgb(0, 255, 0);
+  }
