@@ -62,31 +62,29 @@ if (isset($_POST['register'])) {
             VALUES('$punto', '$direccion', '$direccion/?action=checking&control=$punto&cursoId=$curso', '$fecha', '$curso')";
     if (mysqli_query($conn, $sql)) {
         // Generar el QR como antes
+
+        // Parámetros
         $qrData = "$direccion/?action=checking&control=$punto&cursoId=$curso";
         $tamaño = 10;
         $nivelCorreccion = 'M';
         $margin = 3;
-        $contenido = $qrData;
 
-        // Crear un archivo temporal
-        $tempFile = tempnam(sys_get_temp_dir(), 'qr_') . '.png';
+        // Crear QR directamente en buffer (sin archivo físico)
+        ob_start(); // Iniciar el buffer de salida
+        QRcode::png($qrData, null, $nivelCorreccion, $tamaño, $margin); // Genera la imagen PNG y la envía al buffer
+        $qrBlob = ob_get_contents(); // Obtener contenido binario del buffer
+        ob_end_clean(); // Limpiar y cerrar el buffer
 
-        // Generar QR en archivo temporal
-        QRcode::png($contenido, $tempFile, $nivelCorreccion, $tamaño, $margin);
+        // Insertar el QR en la base de datos (campo tipo LONGBLOB por ejemplo)
+        $idPunto = mysqli_insert_id($conn); // ID recién insertado (verifica si esto es correcto en tu flujo)
 
-        // Leer contenido binario del archivo
-        $qrBlob = file_get_contents($tempFile);
-
-        // Escapar para evitar problemas en la consulta
-        $qrBlobEscaped = mysqli_real_escape_string($conn, $qrBlob);
-
-        // Insertar en la tabla (ejemplo, ajusta a tu lógica)
-        $idPunto = mysqli_insert_id($conn); // ID recién insertado, si aplica
-        $sqlUpdate = "UPDATE ENTRADA_SALIDA SET INOUT_QR_BLOB = '$qrBlobEscaped' WHERE IDPUNTO = ".mysqli_insert_id($conn);
-        mysqli_query($conn, $sqlUpdate);
-
-        // Eliminar el archivo temporal
-        unlink($tempFile);
+        // Preparar consulta segura
+        $sqlUpdate = "UPDATE ENTRADA_SALIDA SET INOUT_QR_BLOB = ? WHERE IDPUNTO = ?";
+        $stmt = mysqli_prepare($conn, $sqlUpdate);
+        mysqli_stmt_bind_param($stmt, "si", $qrBlob, $idPunto);
+        mysqli_stmt_send_long_data($stmt, 0, $qrBlob); // Enviar datos binarios
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
 
         // Redirigir
         header("Location: qr_input_output.php");
