@@ -54,7 +54,7 @@ $searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
 
 // Consulta para seleccionar registros que coincidan con el término de búsqueda
 $sql = "SELECT DISTINCT * FROM LOG_USERS WHERE
-        LOG_IDUSER LIKE '%$searchTerm%'";
+        LOG_IDUSER LIKE '%$searchTerm%' AND LOG_FECHORA >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
 $result = mysqli_query($conn, $sql);
 ?>
 

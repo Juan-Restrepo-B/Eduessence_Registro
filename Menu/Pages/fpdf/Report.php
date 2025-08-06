@@ -17,7 +17,7 @@ if (!empty($_POST["inputData"])) {
 
             $consulta_info = $conn->query("SELECT * FROM EMPRESA"); //traemos datos de la empresa desde BD
             $dato_info = $consulta_info->fetch_object();
-            $this->Image('Logo.png', 160, 5, 45); //logo de la empresa,moverDerecha,moverAbajo,tamañoIMG
+            $this->Image('Logo.jpeg', 160, 5, 45); //logo de la empresa,moverDerecha,moverAbajo,tamañoIMG
             $this->Image('LogoD.jpg', 15, 5, 30); //logo de la empresa,moverDerecha,moverAbajo,tamañoIMG
             $this->SetFont('Arial', 'B', 19); //tipo fuente, negrita(B-I-U-BIU), tamañoTexto
             $this->Cell(37); // Movernos a la derecha

@@ -56,42 +56,51 @@ if (isset($_POST['register'])) {
     $fecha = $_POST["campo2"];
     $curso = $_POST["campo3"];
 
-    // Generar el QR
-    $qrData = "https://www.eduessence.com/?action=checking&control=$punto&cursoId=$curso";
-    ob_start(); // Inicia el buffer
-    QRcode::png($qrData, null, 'M', 10, 3); // QR en PNG
-    $qrBlob = ob_get_clean(); // Obtiene y limpia el buffer
 
-
+    $qrData1 = "https://www.eduessence.com?action=checking&control=$punto&cursoId=$curso";
 
     // Consulta para insertar un nuevo registro en la base de datos
-    $sql = "INSERT INTO ENTRADA_SALIDA (INOUT_PUNTO, INOUT_DIRECCION, INOUT_URL_CONTROL, INOUT_FECHORA, INOUT_CURSO, INOUT_QR)
-            VALUES('$punto', 'https://www.eduessence.com/', '$qrData', '$fecha', '$curso', '$qrBlob')";
-    // if (mysqli_query($conn, $sql)) {
-    //     // Generar el QR
-    //     $qrData = "https://www.eduessence.com/?action=checking&control=$punto&cursoId=$curso";
-    //     ob_start(); // Inicia el buffer
-    //     QRcode::png($qrData, null, 'M', 10, 3); // QR en PNG
-    //     $qrBlob = ob_get_clean(); // Obtiene y limpia el buffer
+    $sql = "INSERT INTO ENTRADA_SALIDA (INOUT_PUNTO, INOUT_DIRECCION, INOUT_URL_CONTROL, INOUT_FECHORA, INOUT_CURSO)
+            VALUES('$punto', 'https://www.eduessence.com/', '$qrData1', '$fecha', '$curso')";
 
-    //     $idPunto = mysqli_insert_id($conn);
+    if (mysqli_query($conn, $sql)) {
 
-    //     // Preparar la consulta
-    //     $sqlUpdate = "UPDATE ENTRADA_SALIDA SET INOUT_QR = ? WHERE IDPUNTO = ?";
-    //     $stmt = mysqli_prepare($conn, $sqlUpdate);
+        // Generar el QR
+        $qrData = "https://www.eduessence.com/?action=checking&control=$punto&cursoId=$curso";
 
-    //     // IMPORTANTE: usa un marcador temporal ('b' no existe en PHP, así que usamos 'si' como dummy)
-    //     $null = NULL;
-    //     mysqli_stmt_bind_param($stmt, "bi", $null, $idPunto); // 'b' no es válido, pero así se inicializa
-    //     mysqli_stmt_send_long_data($stmt, 0, $qrBlob); // Enviar los datos binarios reales
-    //     mysqli_stmt_execute($stmt);
-    //     mysqli_stmt_close($stmt);
+        ob_start();
+        QRcode::png($qrData, null, 'M', 10, 3);
+        $qrBlob = ob_get_clean();
 
-    //     header("Location: qr_input_output.php");
-    //     exit;
-    // } else {
-    //     echo "Error al insertar el registro: " . mysqli_error($conn);
-    // }
+        $idPunto = mysqli_insert_id($conn);
+
+        $sqlUpdate = "UPDATE ENTRADA_SALIDA SET INOUT_QR = ? WHERE IDPUNTO = ?";
+        $stmt = mysqli_prepare($conn, $sqlUpdate);
+
+        if ($stmt) {
+            // b = blob (contenido binario), i = integer
+            mysqli_stmt_bind_param($stmt, "bi", $null, $idPunto);
+
+            // Especificar el contenido binario real
+            mysqli_stmt_send_long_data($stmt, 0, $qrBlob);
+
+            if (mysqli_stmt_execute($stmt)) {
+                log("✅ QR actualizado correctamente en IDPUNTO: $idPunto");
+            } else {
+                log("❌ Error ejecutando el UPDATE: " . mysqli_stmt_error($stmt));
+            }
+
+            mysqli_stmt_close($stmt);
+        } else {
+            log("❌ Error preparando el UPDATE: " . mysqli_error($conn));
+        }
+
+        // Recargar la página
+        header("Refresh: 0");
+        exit;
+    } else {
+        echo "Error al insertar el registro: " . mysqli_error($conn);
+    }
 }
 
 // Consulta para obtener todos los registros de ENTRADA_SALIDA
@@ -218,7 +227,7 @@ $result3 = mysqli_query($conn, "SELECT * FROM CURSOS WHERE IDCURSO NOT IN (1, 2,
                     </td>
                     <td class="imgQR">
                         <?php
-                        $qrBinary = $mostrar['INOUT_QR_BLOB'];
+                        $qrBinary = $mostrar['INOUT_QR'];
                         $qrBase64 = base64_encode($qrBinary);
                         echo "<img width='100' src='data:image/png;base64,{$qrBase64}'>";
                         ?>

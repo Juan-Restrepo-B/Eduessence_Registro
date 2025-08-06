@@ -1,6 +1,7 @@
 <?php
 session_start();
-function showButtons($buttonNumber) {
+function showButtons($buttonNumber)
+{
 
     $user_permission = $_SESSION['user_permission'];
 
@@ -123,7 +124,13 @@ $_SESSION['last_activity'] = time();
                     <td>
                         <?php echo $mostrar['PER_CORREO'] ?>
                     </td>
-                    <td class="imgQR"><img width="100" src="./qr_codes/registro/<?php echo $mostrar['REG_QR'] ?>"></td>
+                    <td class="imgQR">
+                        <?php
+                        $qrBinary = $mostrar['REG_QR'];
+                        $qrBase64 = base64_encode($qrBinary);
+                        echo "<img width='100' src='data:image/png;base64,{$qrBase64}'>";
+                        ?>
+                    </td>
                     <td class="btnfrom"><a href="#" id="mostrarFormulario5"
                             data-idpersona="<?php echo $mostrar['IDPERSONA']; ?>">VER QR</a>
                     </td>
@@ -161,14 +168,22 @@ $_SESSION['last_activity'] = time();
                         var response = JSON.parse(xhr.responseText);
                         var nombre = response.PER_NOMBRES;
                         var apellido = response.PER_APELLIDOS;
-                        var qr = response.REG_QR;
+                        var qrBase64 = response.REG_QR;
 
                         // Mostrar los detalles en el formulario emergente
                         var nombreApellidoElement = document.getElementById("nombreApellido");
                         nombreApellidoElement.textContent = nombre + " " + apellido;
 
                         var qrContainerElement = document.getElementById("qrContainer");
-                        qrContainerElement.innerHTML = "<img src='./qr_codes/registro/" + qr + "'>";
+                        // qrContainerElement.innerHTML = "<img src='./qr_codes/registro/" + qr + "'>";
+
+                        if (qrBase64) {
+                            qrContainerElement.innerHTML = "<img src='data:image/png;base64," + qrBase64 + "'>";
+                        } else {
+                            qrContainerElement.textContent = "Este usuario no tiene QR registrado.";
+                        }
+
+
                     }
                 };
                 xhr.send();
@@ -192,9 +207,10 @@ $_SESSION['last_activity'] = time();
     </footer>
 </body>
 <script>
-        window.addEventListener('beforeunload', function (event) {
-            // Enviar una solicitud al servidor para cerrar la sesión cuando se cierre la pestaña
-            navigator.sendBeacon('../../index.php');
-        });
+    window.addEventListener('beforeunload', function (event) {
+        // Enviar una solicitud al servidor para cerrar la sesión cuando se cierre la pestaña
+        navigator.sendBeacon('../../index.php');
+    });
 </script>
+
 </html>

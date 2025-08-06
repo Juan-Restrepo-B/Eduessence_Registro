@@ -52,40 +52,51 @@ require('phpqrcode/qrlib.php');
 // Procesar el formulario enviado por POST
 if (isset($_POST['register'])) {
     $punto = $_POST["lista"];
-    $direccion = $_POST["campo1"];
     $fecha = $_POST["campo2"];
     $descripcion = $_POST["descrip"];
+    $curso = $_POST["campo3"];
+
+    $qrData1 = "https://www.eduessence.com/?action=checking&control=$punto&cursoId=$curso";
 
     // Consulta para insertar un nuevo registro en la base de datos
-    $sql2 = "INSERT INTO SEGUIMIENTO_SALAS (SEG_PUNTO, SEG_DIRECCION, SEG_URL_CONTROL, SEG_FECHORA, SEG_DESCRIPCION)
-            VALUES('$punto', '$direccion', '$direccion/?action=checking&control=$punto', '$fecha', '$descripcion')";
+    $sql2 = "INSERT INTO SEGUIMIENTO_SALAS (SEG_PUNTO, SEG_DIRECCION, SEG_URL_CONTROL, SEG_FECHORA, SEG_DESCRIPCION, SEG_IDCURSO)
+            VALUES('$punto', 'https://www.eduessence.com', '$qrData1', '$fecha', '$descripcion', '$curso')";
+
     if (mysqli_query($conn, $sql2)) {
         // Registro insertado correctamente
 
         // Generate the QR code data
-        $qrData = $direccion . "/?action=checking&control=" . $punto;
+        $qrData = "https://www.eduessence.com/?action=checking&control=$punto&cursoId=$curso";
+        ob_start();
+        QRcode::png($qrData, null, 'M', 10, 3);
+        $qrBlob = ob_get_clean();
 
-        // Generate a unique filename for the QR code image
-        $qrFilename = uniqid('qr_', true) . '.png';
-
-        // Path where the QR code image will be stored
-        $dir = './qr_codes/seguimiento-salas/' . $qrFilename;
-
-        //Variables
-        $tamaño = 10;
-        $nivelCorreccion = 'M';
-        $margin = 3;
-        $contenido = $qrData;
-
-        // Generate and save the QR code as an image
-        QRcode::png($contenido, $dir, $nivelCorreccion, $tamaño, $margin);
+        $idPunto = mysqli_insert_id($conn);
 
         // Save the QR code filename to the database
-        $sqlUpdate = "UPDATE SEGUIMIENTO_SALAS SET SEG_QR = '$qrFilename' WHERE IDSEGSALAS = " . mysqli_insert_id($conn);
-        mysqli_query($conn, $sqlUpdate);
+        $sqlUpdate = "UPDATE SEGUIMIENTO_SALAS SET SEG_QR = ? WHERE IDSEGSALAS = ?";
+        $stmt = mysqli_prepare($conn, $sqlUpdate);
 
-        // Redirect the user to another page after successful form submission
-        header("Location: follow-up_rooms.php");
+        if ($stmt) {
+            // b = blob (contenido binario), i = integer
+            mysqli_stmt_bind_param($stmt, "bi", $null, $idPunto);
+
+            // Especificar el contenido binario real
+            mysqli_stmt_send_long_data($stmt, 0, $qrBlob);
+
+            if (mysqli_stmt_execute($stmt)) {
+                log("✅ QR actualizado correctamente en IDPUNTO: $idPunto");
+            } else {
+                log("❌ Error ejecutando el UPDATE: " . mysqli_stmt_error($stmt));
+            }
+
+            mysqli_stmt_close($stmt);
+        } else {
+            log("❌ Error preparando el UPDATE: " . mysqli_error($conn));
+        }
+
+        // Recargar la página
+        header("Refresh: 0");
     }
 }
 
@@ -93,9 +104,9 @@ if (isset($_POST['register'])) {
 $result = mysqli_query($conn, "SELECT * FROM SEGUIMIENTO_SALAS ORDER BY IDSEGSALAS DESC");
 
 // Consulta para obtener los puntos de TIPO_DATE con IDTIPODATE en (3, 4)
-$result1 = mysqli_query($conn, "SELECT PUNTO FROM TIPO_DATE WHERE IDTIPODATE IN (1, 2)");
+$result1 = mysqli_query($conn, "SELECT PUNTO FROM TIPO_DATE WHERE IDTIPODATE IN (1, 2, 5)");
 
-$result2 = mysqli_query($conn, "SELECT * FROM LINKS WHERE IDLINKS IN (1)");
+$result3 = mysqli_query($conn, "SELECT * FROM CURSOS WHERE IDCURSO NOT IN (1, 2, 3)");
 
 ?>
 
@@ -131,20 +142,20 @@ $result2 = mysqli_query($conn, "SELECT * FROM LINKS WHERE IDLINKS IN (1)");
                                     }
                                     ?>
                                 </select><br><br>
-                                <!-- Campo de texto para la dirección del servicio web -->
-                                <label for="campo1">DIRECCION SERVICIO WEB:</label>
-                                <select id="campo1" name="campo1">
+                                <label for="descrip">DESCRIPCION:</label>
+                                <input type="textarea" id="descrip" name="descrip" required=""><br><br>
+                                <label for="campo2">FECHA Y HORA:</label>
+                                <input type="datetime-local" id="campo2" name="campo2" required=""><br><br>
+                                <label for="campo3">CURSO:</label>
+                                <select id="campo3" name="campo3">
                                     <?php
-                                    while ($row = mysqli_fetch_array($result2)) {
-                                        $mostrar = $row['LINKS'];
-                                        echo "<option value='$mostrar'>$mostrar</option>";
+                                    while ($row = mysqli_fetch_array($result3)) {
+                                        $idCurso = $row['IDCURSO'];
+                                        $idNombreCurso = $row['CURSONAME'];
+                                        echo "<option value='$idCurso'>$idNombreCurso</option>";
                                     }
                                     ?>
                                 </select><br><br>
-                                <label for="descrip">DESCRIPCION:</label>
-                                <input type="textarea" id="descrip" name="descrip" required=""><br><br>
-                                <label for="campo2">FECHA:</label>
-                                <input type="datetime-local" id="campo2" name="campo2" required=""><br><br>
                                 <button class="btn btn-primary btn-block" type="submit" name="register">CREAR</button>
                                 &nbsp;&nbsp;
                                 <button class="btn btn-secundary btn-block" type="button" name="clsoe"
@@ -216,8 +227,15 @@ $result2 = mysqli_query($conn, "SELECT * FROM LINKS WHERE IDLINKS IN (1)");
                     <td class="fechav">
                         <?php echo $mostrar['SEG_FECHORA'] ?>
                     </td>
-                    <td class="imgQR"><img width="100" src="./qr_codes/seguimiento-salas/<?php echo $mostrar['SEG_QR'] ?>"></td>
-                    <td class="btnfrom"><a href="fpdf/QRSEG.php?IDSEGSALAS=<?php echo $mostrar['IDSEGSALAS']; ?>" target="_blank">IMPRIMIR</a></td>
+                    <td class="imgQR">
+                        <?php
+                        $qrBinary = $mostrar['SEG_QR'];
+                        $qrBase64 = base64_encode($qrBinary);
+                        echo "<img width='100' src='data:image/png;base64,{$qrBase64}'>";
+                        ?>
+                    </td>
+                    <td class="btnfrom"><a href="fpdf/QRSEG.php?IDSEGSALAS=<?php echo $mostrar['IDSEGSALAS']; ?>"
+                            target="_blank">IMPRIMIR</a></td>
                 </tr>
                 <?php
             }
@@ -231,9 +249,10 @@ $result2 = mysqli_query($conn, "SELECT * FROM LINKS WHERE IDLINKS IN (1)");
     </footer>
 </body>
 <script>
-        window.addEventListener('beforeunload', function (event) {
-            // Enviar una solicitud al servidor para cerrar la sesión cuando se cierre la pestaña
-            navigator.sendBeacon('../../index.php');
-        });
+    window.addEventListener('beforeunload', function (event) {
+        // Enviar una solicitud al servidor para cerrar la sesión cuando se cierre la pestaña
+        navigator.sendBeacon('../../index.php');
+    });
 </script>
+
 </html>

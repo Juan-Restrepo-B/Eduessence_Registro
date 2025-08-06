@@ -575,7 +575,13 @@ $result3 = mysqli_query($conn, "SELECT * FROM CURSOS");
                     <td>
                         <?php echo $mostrar['PER_PAIS'] ?>
                     </td>
-                    <td class="imgQR"><img width="100" src="./qr_codes/personal/<?php echo $mostrar['PER_QR'] ?>"></td>
+                    <td class="imgQR">
+                        <?php
+                        $qrBinary = $mostrar['PER_QR'];
+                        $qrBase64 = base64_encode($qrBinary);
+                        echo "<img width='100' src='data:image/png;base64,{$qrBase64}'>";
+                        ?>
+                    </td>
                     <td class="btnfrom"><a
                             href="fpdf/Personal.php?IDPERSONA=<?php echo $mostrar['IDPERSONA'] ?>&CATEGORIA=<?php echo $mostrar['PER_CATEGORIA'] ?>"
                             target="_blank">IMPRIMIR</a></td>

@@ -27,7 +27,7 @@ main {
 /*REGISTRO FORMULARIO*/
 .formulario5 {
   width: 690px;
-  height: 705px;
+  height: 600px;
   text-align: center;
   display: block;
   margin: 120px  auto;
@@ -54,5 +54,5 @@ main {
 #qrContainer img{
   padding-top: 40px;
   padding-bottom: 40px;
-  width: 470px;
+  width: 370px;
 }

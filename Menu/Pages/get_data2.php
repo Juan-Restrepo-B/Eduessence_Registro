@@ -2,7 +2,8 @@
 include("con_db.php");
 
 
-$sql4 = "SELECT DISTINCT LOG_IDUSER FROM LOG_USERS";
+$sql4 = "SELECT DISTINCT LOG_IDUSER FROM LOG_USERS
+-- AND LOG_FECHORA >= DATE_SUB(NOW(), INTERVAL 1 MONTH)";
 $result4 = $conn->query($sql4);
 
 $data = array();
