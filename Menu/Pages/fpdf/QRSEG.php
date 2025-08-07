@@ -30,7 +30,7 @@ class PDF extends FPDF
             $this->SetFont('Arial', 'B', 20);
             $this->Cell( 190, 3, utf8_decode($dato_info->SEG_DESCRIPCION), 0, 1, 'C', 0);
             $this->Ln(7);
-            $this->Image('LogoA.png', 55,  232, 90);
+            $this->Image('UNIVERSIDAD-NORTE.jpeg', 55,  232, 90);
             $this->Image('Logo.jpeg', 20, 240, 40); // Logo superior
             $this->Image('SIPEHA.png', 140, 240, 50);
 

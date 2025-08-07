@@ -37,7 +37,7 @@ class PDF extends FPDF
          $this->Cell(100, 35, utf8_decode($dato_info->INOUT_PUNTO), 0, 1, 'C', 0);
          $this->Ln(7);
 
-         $this->Image('LogoA.png', 5, 232, 90);
+         $this->Image('UNIVERSIDAD-NORTE.jpeg', 5, 232, 90);
          $this->Image('SIPEHA.png', 140, 240, 50);
       }
    }
